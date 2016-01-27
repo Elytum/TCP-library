@@ -79,7 +79,7 @@ void			 socket_event(t_server *server, fd_set *readfds, int *addrlen)
     {
         sd = server->client_socket[i];
           
-        if (FD_ISSET( sd , readfds)) 
+        if (FD_ISSET(sd , readfds)) 
         {
             //Check if it was for closing , and also read the incoming message
             if ((valread = read( sd , buffer, 1024)) == 0)
@@ -96,6 +96,7 @@ void			 socket_event(t_server *server, fd_set *readfds, int *addrlen)
             {
                 //set the string terminating NULL byte on the end of the data read
                 buffer[valread] = '\0';
+                printf("[%s]", buffer);
                 send(sd , buffer , strlen(buffer) , 0 );
             }
         }
@@ -125,5 +126,4 @@ void		      loop_server(t_server server)
         //else its some IO operation on some other socket :)
         socket_event(&server, &readfds, &addrlen);
     }
-	(void)server;
 }

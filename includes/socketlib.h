@@ -22,8 +22,7 @@ typedef struct			s_server
 typedef struct			s_client
 {
 	t_header			header;
-	int					server_socket;
-	int					client_socket;
+	int					socket;
 	struct sockaddr_in	address;
 }						t_client;
 
@@ -40,7 +39,10 @@ void     	stop_client(t_client client);
 
 
 int 				new_socket(void);
+int					delete_socket(int sock);
 struct sockaddr_in	config_socket(const char *addr, int port);
+
+void				setup_signals(void);
 
 # define TRUE   1
 # define FALSE  0

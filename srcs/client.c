@@ -13,9 +13,9 @@ t_client          start_client(const char *addr, int port)
 {
    t_client       client;
 
-   client.client_socket = new_socket();
+   client.socket = new_socket();
    client.address = config_socket(addr, port);
-   if (connect(client.client_socket, (struct sockaddr*)&client.address, sizeof(client.address)) != 0)
+   if (connect(client.socket, (struct sockaddr*)&client.address, sizeof(client.address)) != 0)
    {
       perror("Connect ");
       exit(errno);
@@ -25,7 +25,7 @@ t_client          start_client(const char *addr, int port)
 
 void              stop_client(t_client client)
 {
-   close(client.client_socket);
+   delete_socket(client.socket);
 }
 
 void              get_message(t_client client)
@@ -33,6 +33,6 @@ void              get_message(t_client client)
     char buffer[MAXBUF];
 
     bzero(buffer, MAXBUF);
-    recv(client.client_socket, buffer, sizeof(buffer), 0);
+    recv(client.socket, buffer, sizeof(buffer), 0);
     printf("%s", buffer);
 }
