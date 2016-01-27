@@ -1,4 +1,5 @@
 #include <socketlib.h>
+#include <config.h>
 
 #define SERVER
 
@@ -6,7 +7,7 @@ int			main(void)
 {
 	t_server	server;
 
-	server = start_server(4242);
+	server = start_server(PORT);
 	// set_hook(server, "Name", &function, sizeof(t_server));
 	// trigger_hook(server, "Name", (t_server)something);
 	loop_server(server);

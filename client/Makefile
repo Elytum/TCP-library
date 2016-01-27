@@ -48,5 +48,5 @@ fclean:	clean
 	rm -f $(NAME)
 
 re: fclean all
-	make re -C htable
+	make re -C ../htable
 	make
