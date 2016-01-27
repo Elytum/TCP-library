@@ -13,7 +13,6 @@ typedef struct			e_header
 
 typedef struct			s_server
 {
-	int					i;
 	t_header			header;
 	int					master_socket;
 	int					client_socket[MAX_CLIENTS];
@@ -22,8 +21,10 @@ typedef struct			s_server
 
 typedef struct			s_client
 {
-	int					i;
 	t_header			header;
+	int					server_socket;
+	int					client_socket;
+	struct sockaddr_in	address;
 }						t_client;
 
 t_server	start_server(int port);
@@ -32,6 +33,14 @@ int			socket_add_child(t_server *server, struct _types_fd_set *readfds, int max_
 void		incoming_connection(t_server *server, fd_set *readfds, int *addrlen);
 void		socket_event(t_server *server, fd_set *readfds, int *addrlen);
 void		loop_server(t_server server);
+
+t_client 	start_client(const char *addr, int port);
+void     	get_message(t_client client);
+void     	stop_client(t_client client);
+
+
+int 				new_socket(void);
+struct sockaddr_in	config_socket(const char *addr, int port);
 
 # define TRUE   1
 # define FALSE  0

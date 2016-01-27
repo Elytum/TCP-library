@@ -4,18 +4,6 @@
 #include <stdio.h>
 #include <errno.h>
 
-static int          create_master(void)
-{
-    int             master_socket;
-
-    if ((master_socket = socket(AF_INET , SOCK_STREAM , 0)) == 0) 
-    {
-        perror("socket failed");
-        exit(EXIT_FAILURE);
-    }
-    return (master_socket);
-}
-
 static void         config_server(t_server *server, int port)
 {
     unsigned int    i;
@@ -24,10 +12,9 @@ static void         config_server(t_server *server, int port)
     i = 0;
     while (i < TAB_SIZE(server->client_socket))
         server->client_socket[i++] = 0;
-    //type of socket created
-    server->address.sin_family = AF_INET;
-    server->address.sin_addr.s_addr = INADDR_ANY;
-    server->address.sin_port = htons(port);
+    //create a master socket
+    server.master_socket = new_socket();
+    server->address = config_socket(NULL, port);
 }
 
 static void         config_master(t_server *server)
@@ -59,8 +46,6 @@ t_server	       start_server(int port)
 	t_server       server;
 
     config_server(&server, port);
-	//create a master socket
-    server.master_socket = create_master();
     //set master socket to allow multiple connections , this is just a good habit, it will work without this
     config_master(&server);
     if (VERBOSE)
