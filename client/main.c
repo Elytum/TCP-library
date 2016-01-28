@@ -7,66 +7,49 @@
 #include <string.h>
 #include <unistd.h>
 
-t_client *global_client;
+/*
+  while(TRUE) 
+    {
+        //clear the socket set
+        FD_ZERO(&readfds);
+        //add master socket to set
+        FD_SET(server.master_socket, &readfds);
+        max_sd = socket_add_child(&server, &readfds, server.master_socket);
+        //wait for an activity on one of the sockets , timeout is NULL , so wait indefinitely
+        if ((select( max_sd + 1 , &readfds , NULL , NULL , NULL) < 0) && (errno!=EINTR)) 
+          printf("select error");
+        //If something happened on the master socket , then its an incoming connection
+        incoming_connection(&server, &readfds, &addrlen);
+        //else its some IO operation on some other socket :)
+        socket_event(&server, &readfds, &addrlen);
+    }
+*/
 
-#define CLIENT
-
-// void	client_event(t_client *client, fd_set *readfds, int *addrlen)
-// {
-// 	char	buffer[1025];
-// 	int		valread;
-// 	int		sd;
-
-//     sd = client->socket;
-      
-//     if (FD_ISSET(sd , readfds)) 
-//     {
-//         //Check if it was for closing , and also read the incoming message
-//         if ((valread = read( sd , buffer, 1024)) == 0)
-//         {
-//             //Somebody disconnected , get his details and print
-//             getpeername(sd , (struct sockaddr*)&client->address , (socklen_t*)&addrlen);
-//             printf("Host disconnected , ip %s , port %d \n" , inet_ntoa(client->address.sin_addr) , ntohs(client->address.sin_port));
-//             //Close the socket and mark as 0 in list for reuse
-//             close( sd );
-//             exit(0);
-//         }
-//         //Echo back the message that came in
-//         else
-//         {
-//             //set the string terminating NULL byte on the end of the data read
-//             buffer[valread] = '\0';
-//             printf("[%s]\n", buffer);
-//             // send(sd , buffer , strlen(buffer) , 0 );
-//         }
-//     }
-// }
-
-char    *get_input(void)
+void       socket_event_client(t_client *client, fd_set *readfds, int *addrlen)
 {
-    static char buffer[1024];
-
-    buffer[read(1, buffer, sizeof(buffer) - 1) - 1] = '\0';
-    return (buffer);
-}
-
-void    send_message(int sock, char *str, size_t len)
-{
-    const char    type[] = "print";
-    char          c;
-
-    (void)sock;
-    c = sizeof(type) - 1;
-    printf("%i %zu [%s] [%s]\n", c, len, type, str);
-    send(sock, &c, sizeof(c), 0);
-    send(sock, &len, sizeof(len), 0);
-    send(sock, type, sizeof(type) - 1, 0);
-    send(sock, str, len, 0);
+  printf("Try input\n");
+  if (FD_ISSET(client->socket , readfds)) 
+  {
+      //Check if it was for closing , and also read the incoming message
+      printf("Input detected\n");
+      if (receive_order(client->socket) == -1)
+      {
+          //Somebody disconnected , get his details and print
+      // getpeername(client->socket , (struct sockaddr*)&client->address , (socklen_t*)&addrlen);
+      // printf("Server disconnected , ip %s , port %d \n" , inet_ntoa(client->address.sin_addr) , ntohs(client->address.sin_port));
+          printf("Server disconnected\n");
+          (void)addrlen;
+          //Close the socket and mark as 0 in list for reuse
+          close( client->socket );
+          client->socket = 0;
+      }
+  }
 }
 
 void	loop(t_client client)
 {
     fd_set        readfds; //set of socket descriptors
+    int addrlen = 0;
 
 	while(TRUE)
     {
@@ -79,15 +62,17 @@ void	loop(t_client client)
         // // max_sd = socket_add_child(&client, &readfds, client.socket);
         // //wait for an activity on one of the sockets , timeout is NULL , so wait indefinitely
         if ((select(1, &readfds , NULL , NULL , NULL) < 0) && (errno!=EINTR)) 
-        	printf("select error");
+          printf("select error");
         // //If something happened on the master socket , then its an incoming connection
         // // incoming_connection(&client, &readfds, &addrlen);
         // //else its some IO operation on some other socket :)
         // client_event(&client, &readfds, &addrlen);
+        socket_event_client(&client, &readfds, &addrlen);
         if (FD_ISSET(STDIN_FILENO, &readfds))
         {
             char *input = get_input();
-            send_message(client.socket, input, strlen(input) + 1);
+            // send_message(client.socket, input, strlen(input) + 1);
+            send_back_message(client.socket, input, strlen(input) + 1);
         }
     }
 }
@@ -98,10 +83,6 @@ int		main(void)
 
     setup_signals();
    client = start_client(IP, PORT);
-   
-   // global_client = &client;
-   // signal(SIGTERM, &client_signal);
-
    get_message(client);
    loop(client);
    stop_client(client);

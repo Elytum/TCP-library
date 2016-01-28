@@ -5,15 +5,7 @@
 #include <stdio.h>
 #include <unistd.h>
 
-
-#ifdef SERVER
-int		sockets[MAX_SERVERS];
-#elif CLIENT
-int		sockets[MAX_CLIENT];
-#else
-int		sockets[1];
-#endif
-
+int		sockets[MAX_CLIENTS];
 int		max_socket = 0;
 
 int					new_socket(void)

@@ -18,7 +18,8 @@ MYPATH	=	$(HOME)
 #--------------Sources----------------------#
 FILES	=	server.c			\
 			server_events.c		\
-			common.c
+			common.c			\
+			exchanges.c
 
 INC		=	-I ../includes -I ../htable
 CCFLAGS	=	-Wall -Wextra -g -O3

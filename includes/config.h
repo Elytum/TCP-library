@@ -2,7 +2,7 @@
 # define CONFIG_H
 
 #define MAX_CLIENTS 30
-#define MAX_SERVERS 2
+#define MAX_SERVERS 1
 #define VERBOSE 1
 #define PRINT "print"
 #define TYPE_MAX 10

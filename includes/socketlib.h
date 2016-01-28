@@ -44,6 +44,11 @@ struct sockaddr_in	config_socket(const char *addr, int port);
 
 void				setup_signals(void);
 
+void    			send_message(int sock, char *str, size_t len);
+void				send_back_message(int sock, char *str, size_t len);
+int					receive_order(int sock);
+size_t				recv_data(int sock, void *buffer, size_t size, unsigned char tries);
+char    			*get_input(void);
 # define TRUE   1
 # define FALSE  0
 

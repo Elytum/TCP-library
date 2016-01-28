@@ -1,8 +1,6 @@
 #include <socketlib.h>
 #include <config.h>
 
-#define SERVER
-
 int			main(void)
 {
 	t_server	server;
