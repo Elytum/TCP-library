@@ -1,7 +1,10 @@
 #ifndef CONFIG_H
 # define CONFIG_H
 
-#define MAX_PRODUCERS 30
+#define MAX_PENDINGS 5
+#define MAX_PRODUCERS 10
+#define MAX_CONSUMERS 10
+
 #define MAX_SERVERS 1
 #define VERBOSE 1
 #define PRINT "print"

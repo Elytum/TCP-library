@@ -65,13 +65,23 @@ int					receive_order(int sock)
 
 	if (recv_data(sock , &type_size, sizeof(type_size), 1) != sizeof(type_size))
 		return (-1);
-	if (type_size >= sizeof(type) || recv_data(sock , type, type_size, 10) != type_size)
-		return (empty_recv(sock));	if (recv_data(sock , &size, sizeof(size), 10) != sizeof(size))
+	if (type_size)
+	{
+		if (type_size >= sizeof(type) || recv_data(sock , type, type_size, 10) != type_size)
+			return (empty_recv(sock));
+	}
+	if (recv_data(sock , &size, sizeof(size), 10) != sizeof(size))
 		return (empty_recv(sock));
-	if (size >= sizeof(message) ||recv_data(sock , message, size, 10) != size)
-		return (empty_recv(sock));
-	if (!strncmp(type, "print", 5))
+	if (size)
+	{
+		if (size >= sizeof(message) || recv_data(sock , message, size, 10) != size)
+			return (empty_recv(sock));
+	}
+	type[type_size] = '\0';
+	if (!strcmp(type, "print"))
 		printf("print: Typesize: %i [%s], size: %i [%s]\n", type_size, type, size, message);
+	else if (!strcmp(type, "print tab"))
+		printf("print tab: {%i %i}\n", ((int *)message)[0], ((int *)message)[1]);
 	else
 		printf("Unknown order %s\n", type);
 	return (1);

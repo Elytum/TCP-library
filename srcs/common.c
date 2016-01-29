@@ -42,13 +42,13 @@ struct sockaddr_in	config_socket(const char *addr, int port)
 	return (config);
 }
 
-void	    		closing_signal(int id)
-{
-    printf("Stopped by signal: %i\n", id);
-    exit(0);
-}
+// void	    		closing_signal(int id)
+// {
+//     printf("Stopped by signal: %i\n", id);
+//     exit(0);
+// }
 
-void				setup_signals(void)
-{
-	signal(SIGTERM, &closing_signal);
-}
+// void				setup_signals(void)
+// {
+// 	signal(SIGTERM, &closing_signal);
+// }

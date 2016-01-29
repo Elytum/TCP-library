@@ -6,31 +6,26 @@
 
 # include <arpa/inet.h>    //close
 
-typedef struct			e_header
-{
-	size_t				size;
-}						t_header;
-
 typedef struct			s_server
 {
-	t_header			header;
 	int					master_socket;
-	int					producer_socket[MAX_PRODUCERS];
+	int					pending_sockets[MAX_PENDINGS];
+	int					producer_sockets[MAX_PRODUCERS];
+	int					consumer_sockets[MAX_CONSUMERS];
 	struct sockaddr_in	address;
 }						t_server;
 
 typedef struct			s_producer
 {
-	t_header			header;
 	int					socket;
 	struct sockaddr_in	address;
 }						t_producer;
 
 t_server			start_server(int port);
-void				socket_add(t_server *server, int new_socket);
-int					socket_add_child(t_server *server, struct _types_fd_set *readfds, int max_sd);
+void				socket_add(int *sockets, int new_socket, size_t max);
+int					socket_add_child(int *sockets, struct _types_fd_set *readfds, int max_sd, size_t max);
 void				incoming_connection(t_server *server, fd_set *readfds, int *addrlen);
-void				socket_event(t_server *server, fd_set *readfds, int *addrlen);
+void				socket_event(t_server *server, fd_set *readfds);
 void				loop_server(t_server server);
 
 t_producer 			start_producer(const char *addr, int port);
@@ -48,6 +43,9 @@ void				send_back_message(int sock, char *str, size_t len);
 int					receive_order(int sock);
 size_t				recv_data(int sock, void *buffer, size_t size, unsigned char tries);
 char    			*get_input(void);
+
+int					empty_recv(int sock);
+
 # define TRUE   1
 # define FALSE  0
 

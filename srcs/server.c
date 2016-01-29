@@ -6,12 +6,19 @@
 
 static void         config_server(t_server *server, int port)
 {
-    unsigned int    i;
+    // unsigned int    i;
 
-    //initialise all producer_socket[] to 0 so not checked
-    i = 0;
-    while (i < TAB_SIZE(server->producer_socket))
-        server->producer_socket[i++] = 0;
+    //initialise all sockets[] to 0 so not checked
+    bzero(server->pending_sockets, sizeof(server->pending_sockets));
+    bzero(server->producer_sockets, sizeof(server->producer_sockets));
+    bzero(server->consumer_sockets, sizeof(server->consumer_sockets));
+    // i = 0;
+    // while (i < TAB_SIZE(server->pending_sockets))
+    //     server->pending_sockets[i++] = 0;
+    // while (i < TAB_SIZE(server->producer_sockets))
+    //     server->producer_sockets[i++] = 0;
+    // while (i < TAB_SIZE(server->consumer_sockets))
+    //     server->consumer_sockets[i++] = 0;
     //create a master socket
     server->master_socket = new_socket();
     server->address = config_socket(NULL, port);
@@ -49,6 +56,6 @@ t_server	       start_server(int port)
     //set master socket to allow multiple connections , this is just a good habit, it will work without this
     config_master(&server);
     if (VERBOSE)
-    	printf("Server started on port %d \n", port);
+    	printf("Server started on port %d\n", port);
 	return (server);
 }
