@@ -13,14 +13,16 @@
 # -------------Compilateur------------------#
 CC		=	gcc
 #--------------Name-------------------------#
-NAME	=	client
+NAME	=	producer
 MYPATH	=	$(HOME)
 #--------------Sources----------------------#
-FILES	=	client.c	\
-			common.c	\
-			exchanges.c
+FILES	=	producer.c			\
+			common.c			\
+			exchanges.c			\
+			requests/request.c	\
+			requests/requests.c
 
-INC		=	-I ../includes -I ../htable
+INC		=	-I ../includes -I ../htable -I ../srcs/requests
 CCFLAGS	=	-Wall -Wextra -g -O3
 
 SRCS	=	$(addprefix ../srcs/, $(FILES))

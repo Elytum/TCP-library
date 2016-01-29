@@ -15,31 +15,30 @@ typedef struct			s_server
 {
 	t_header			header;
 	int					master_socket;
-	int					client_socket[MAX_CLIENTS];
+	int					producer_socket[MAX_PRODUCERS];
 	struct sockaddr_in	address;
 }						t_server;
 
-typedef struct			s_client
+typedef struct			s_producer
 {
 	t_header			header;
 	int					socket;
 	struct sockaddr_in	address;
-}						t_client;
+}						t_producer;
 
-t_server	start_server(int port);
-void		socket_add(t_server *server, int new_socket);
-int			socket_add_child(t_server *server, struct _types_fd_set *readfds, int max_sd);
-void		incoming_connection(t_server *server, fd_set *readfds, int *addrlen);
-void		socket_event(t_server *server, fd_set *readfds, int *addrlen);
-void		loop_server(t_server server);
+t_server			start_server(int port);
+void				socket_add(t_server *server, int new_socket);
+int					socket_add_child(t_server *server, struct _types_fd_set *readfds, int max_sd);
+void				incoming_connection(t_server *server, fd_set *readfds, int *addrlen);
+void				socket_event(t_server *server, fd_set *readfds, int *addrlen);
+void				loop_server(t_server server);
 
-t_client 	start_client(const char *addr, int port);
-void     	get_message(t_client client);
-void     	stop_client(t_client client);
+t_producer 			start_producer(const char *addr, int port);
+void     			stop_producer(t_producer producer);
 
 
 int 				new_socket(void);
-int					delete_socket(int sock);
+void				delete_socket(int sock);
 struct sockaddr_in	config_socket(const char *addr, int port);
 
 void				setup_signals(void);

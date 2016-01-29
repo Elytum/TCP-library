@@ -10,12 +10,12 @@ void		      socket_add(t_server *server, int new_socket)
 	int		      i;
 
 	i = 0;
-    while (i < MAX_CLIENTS) 
+    while (i < MAX_PRODUCERS) 
     {
         //if position is empty
-        if (server->client_socket[i] == 0)
+        if (server->producer_socket[i] == 0)
         {
-            server->client_socket[i] = new_socket;
+            server->producer_socket[i] = new_socket;
             printf("Adding to list of sockets as %d\n" , i);
             break;
         }
@@ -29,10 +29,10 @@ int			      socket_add_child(t_server *server, struct _types_fd_set *readfds, in
 	int		      sd;
 
 	i = 0;
-	while (i < MAX_CLIENTS) 
+	while (i < MAX_PRODUCERS) 
     {
         //socket descriptor
-        sd = server->client_socket[i];
+        sd = server->producer_socket[i];
         //if valid socket descriptor then add to read list
         if (sd > 0)
             FD_SET(sd, readfds);
@@ -73,13 +73,14 @@ void			 socket_event(t_server *server, fd_set *readfds, int *addrlen)
 	int		sd;
 
 	i = 0;
-	while (i < MAX_CLIENTS) 
+	while (i < MAX_PRODUCERS) 
     {
-        sd = server->client_socket[i];
+        sd = server->producer_socket[i];
 
         if (FD_ISSET(sd , readfds)) 
         {
             //Check if it was for closing , and also read the incoming message
+            // if (receive_order(sd) == -1)
             if (receive_order(sd) == -1)
             {
                 //Somebody disconnected , get his details and print
@@ -87,7 +88,7 @@ void			 socket_event(t_server *server, fd_set *readfds, int *addrlen)
                 printf("Host disconnected , ip %s , port %d \n" , inet_ntoa(server->address.sin_addr) , ntohs(server->address.sin_port));
                 //Close the socket and mark as 0 in list for reuse
                 close( sd );
-                server->client_socket[i] = 0;
+                server->producer_socket[i] = 0;
             }
         }
         ++i;
@@ -98,7 +99,7 @@ void		      loop_server(t_server server)
 {
 	int		      addrlen;
     fd_set        readfds; //set of socket descriptors
-    int		      max_sd, activity;
+    int		      max_sd;
 
 	while(TRUE) 
     {

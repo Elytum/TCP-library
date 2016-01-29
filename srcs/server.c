@@ -8,10 +8,10 @@ static void         config_server(t_server *server, int port)
 {
     unsigned int    i;
 
-    //initialise all client_socket[] to 0 so not checked
+    //initialise all producer_socket[] to 0 so not checked
     i = 0;
-    while (i < TAB_SIZE(server->client_socket))
-        server->client_socket[i++] = 0;
+    while (i < TAB_SIZE(server->producer_socket))
+        server->producer_socket[i++] = 0;
     //create a master socket
     server->master_socket = new_socket();
     server->address = config_socket(NULL, port);
