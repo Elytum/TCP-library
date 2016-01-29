@@ -6,19 +6,10 @@
 
 static void         config_server(t_server *server, int port)
 {
-    // unsigned int    i;
-
     //initialise all sockets[] to 0 so not checked
     bzero(server->pending_sockets, sizeof(server->pending_sockets));
     bzero(server->producer_sockets, sizeof(server->producer_sockets));
     bzero(server->consumer_sockets, sizeof(server->consumer_sockets));
-    // i = 0;
-    // while (i < TAB_SIZE(server->pending_sockets))
-    //     server->pending_sockets[i++] = 0;
-    // while (i < TAB_SIZE(server->producer_sockets))
-    //     server->producer_sockets[i++] = 0;
-    // while (i < TAB_SIZE(server->consumer_sockets))
-    //     server->consumer_sockets[i++] = 0;
     //create a master socket
     server->master_socket = new_socket();
     server->address = config_socket(NULL, port);

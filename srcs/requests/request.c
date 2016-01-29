@@ -1,6 +1,7 @@
 #include <requests.h>
 #include <string.h>
 #include <stdio.h>
+#include <config.h>
 
 int		add_request(t_request requests[][MAX_REQUESTS], const char *key, void *value, t_data_info info)
 {

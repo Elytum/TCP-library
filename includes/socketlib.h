@@ -21,6 +21,12 @@ typedef struct			s_producer
 	struct sockaddr_in	address;
 }						t_producer;
 
+typedef enum			s_login_type
+{
+	PRODUCER = 0,
+	CONSUMER
+}						e_login_type;
+
 t_server			start_server(int port);
 void				socket_add(int *sockets, int new_socket, size_t max);
 int					socket_add_child(int *sockets, struct _types_fd_set *readfds, int max_sd, size_t max);
@@ -28,10 +34,12 @@ void				incoming_connection(t_server *server, fd_set *readfds, int *addrlen);
 void				socket_event(t_server *server, fd_set *readfds);
 void				loop_server(t_server server);
 
+ssize_t				login(int sock, e_login_type type,
+						const char *user, const char *passwd);
+
 t_producer 			start_producer(const char *addr, int port);
 void     			stop_producer(t_producer producer);
-ssize_t				login_producer(t_producer producer,
-						const char *user, const char *passwd);
+
 ssize_t				produce_request(int sock, const char *type,
 						unsigned char type_len, void *rawbytes, unsigned int bytes);
 
@@ -48,6 +56,10 @@ size_t				recv_data(int sock, void *buffer, size_t size, unsigned char tries);
 char    			*get_input(void);
 
 int					empty_recv(int sock);
+
+void				sockets_add(int *sockets, int new_socket, size_t max);
+int					sockets_full(int *sockets, size_t max);
+int					authentication(t_server *server, int sock);
 
 # define TRUE   1
 # define FALSE  0

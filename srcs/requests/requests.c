@@ -1,6 +1,7 @@
 #include <requests.h>
 #include <string.h>
 #include <stdio.h>
+#include <config.h>
 
 int		set_requests_size(t_request requests[][MAX_REQUESTS], const char *key, int exact_size)
 {

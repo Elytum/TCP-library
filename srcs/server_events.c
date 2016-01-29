@@ -6,38 +6,6 @@
 #include <unistd.h>
 #include <string.h>
 
-void		      sockets_add(int *sockets, int new_socket, size_t max)
-{
-	unsigned int		      i;
-
-	i = 0;
-    while (i < max) 
-    {
-        //if position is empty
-        if (sockets[i] == 0)
-        {
-            sockets[i] = new_socket;
-            break;
-        }
-        ++i;
-    }
-}
-
-int              sockets_full(int *sockets, size_t max)
-{
-    unsigned int           i;
-
-    i = 0;
-    while (i < max)
-    {
-        //if position is empty
-        if (sockets[i] == 0)
-            return (0);
-        ++i;
-    }
-    return (1);
-}
-
 static unsigned int               sub_sockets_add_child(int *sockets, struct _types_fd_set *readfds, int max_sd, size_t max)
 {
     unsigned int         i;
@@ -59,7 +27,7 @@ static unsigned int               sub_sockets_add_child(int *sockets, struct _ty
     return (max_sd);
 }
 
-int			      sockets_add_child(t_server server, struct _types_fd_set *readfds)
+static int			      sockets_add_child(t_server server, struct _types_fd_set *readfds)
 {
 	int		      max_sd;
 
@@ -93,50 +61,10 @@ void			 incoming_connection(t_server *server, fd_set *readfds, int *addrlen)
     }
 }
 
-char                *authentication(int sock)
-{
-    unsigned char   type_size;
-    char            type[TYPE_MAX];
-    unsigned int    sizes[2];
-    char            logs[SEND_MAX];
-
-    if (recv_data(sock , &type_size, sizeof(type_size), 1) != sizeof(type_size))
-        return (NULL);
-    if (type_size)
-    {
-        if (type_size >= sizeof(type) || recv_data(sock , type, type_size, 10) != type_size)
-            return (NULL);
-    }
-    if (recv_data(sock , &sizes[0], sizeof(sizes[0]), 10) != sizeof(sizes[0]))
-        return (NULL);
-    printf("Type: %s\n", type);
-    if (sizes[0])
-    {
-        if (sizes[0] >= sizeof(logs) || recv_data(sock , logs, sizes[0], 10) != sizes[0])
-            return (NULL);
-    }
-    if (recv_data(sock , &sizes[1], sizeof(sizes[1]), 10) != sizeof(sizes[1]))
-        return (NULL);
-    if (sizes[1])
-    {
-        if (sizes[1] >= sizeof(logs) || recv_data(sock , logs + sizes[0], sizes[1], 10) != sizes[1])
-            return (NULL);
-    }
-    printf("Login: %s, Password: %s\n", logs, logs + sizes[0]);
-    if (!strcmp(logs, "arthur") && !strcmp(logs + sizes[0], "chazal"))
-        return (strdup(logs));
-    else
-    {
-        printf("Failed login as %s\n", logs);
-        return (NULL);
-    }
-}
-
 void             update_pendings(t_server *server, fd_set *readfds)
 {
     unsigned int     i;
-    int     sd;
-    char    *user;
+    int              sd;
 
     i = 0;
     while (i < MAX_PENDINGS) 
@@ -146,19 +74,9 @@ void             update_pendings(t_server *server, fd_set *readfds)
         if (FD_ISSET(sd , readfds)) 
         {
             //Launch authentication test
-            if (sockets_full(server->pending_sockets, MAX_PENDINGS) || !(user = authentication(sd)))
-            {
-                //somebody tried to authenticate himself but failed
+            if (!authentication(server, sd))
                 close(sd);
-                server->pending_sockets[i] = 0;
-            }
-            else
-            {
-                printf("Logged in user: %s\n", user);
-                free(user);
-                sockets_add(server->producer_sockets, server->pending_sockets[i], MAX_PRODUCERS);
-                server->pending_sockets[i] = 0;
-            }
+            server->pending_sockets[i] = 0;
         }
         ++i;
     }
@@ -206,6 +124,7 @@ void		      loop_server(t_server server)
         FD_ZERO(&readfds);
         //add master socket to set
         FD_SET(server.master_socket, &readfds);
+        //add every other sockets to set
         max_sd = sockets_add_child(server, &readfds);
         //wait for an activity on one of the sockets , timeout is NULL , so wait indefinitely
         if ((select( max_sd + 1 , &readfds , NULL , NULL , NULL) < 0) && (errno!=EINTR)) 

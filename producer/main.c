@@ -27,7 +27,7 @@ int			main(void)
 	t_producer	producer;
 
 	producer = start_producer(IP, PORT);
-	login_producer(producer, "arthur", "chazal");
+	login(producer.socket, PRODUCER, "Arthur", "Chazal");
 	while (producer.socket)
 	{
 		printf("Loop\n");
