@@ -12,6 +12,8 @@
 #define SEND_MAX 15000
 
 #define PORT 4141
-#define IP "192.168.1.34"
+#define IP "172.20.20.110"
+
+#define DEBUG 1
 
 #endif

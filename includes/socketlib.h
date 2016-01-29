@@ -30,7 +30,10 @@ void				loop_server(t_server server);
 
 t_producer 			start_producer(const char *addr, int port);
 void     			stop_producer(t_producer producer);
-
+ssize_t				login_producer(t_producer producer,
+						const char *user, const char *passwd);
+ssize_t				produce_request(int sock, const char *type,
+						unsigned char type_len, void *rawbytes, unsigned int bytes);
 
 int 				new_socket(void);
 void				delete_socket(int sock);

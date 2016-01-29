@@ -2,7 +2,6 @@
 # define REQUEST_H
 
 #define MAX_REQUESTS 10
-#define DEBUG 1
 #define TAB_SIZE(tab) (sizeof(tab) / sizeof(*tab))
 
 #include <stdlib.h>

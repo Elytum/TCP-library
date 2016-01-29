@@ -21,7 +21,8 @@ FILES	=	server.c			\
 			common.c			\
 			exchanges.c			\
 			requests/request.c	\
-			requests/requests.c
+			requests/requests.c	\
+			producer/producer.c
 
 INC		=	-I ../includes -I ../htable -I ../srcs/requests
 CCFLAGS	=	-Wall -Wextra -g -O3

@@ -80,6 +80,8 @@ int					receive_order(int sock)
 	type[type_size] = '\0';
 	if (!strcmp(type, "print"))
 		printf("print: Typesize: %i [%s], size: %i [%s]\n", type_size, type, size, message);
+	else if (!strcmp(type, "Detected"))
+		printf("Hello %s\n", message);
 	else if (!strcmp(type, "print tab"))
 		printf("print tab: {%i %i}\n", ((int *)message)[0], ((int *)message)[1]);
 	else
