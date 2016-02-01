@@ -26,49 +26,50 @@ ssize_t				produce_request(int sock, const char *type,
 	return (send(sock, buffer, len, 0));
 }
 
-// ssize_t					login_producer(t_producer producer,
-// 							const char *user, const char *passwd)
-// {
-// 	const unsigned int	user_len = strlen(user) + 1;
-// 	const unsigned int	passwd_len = strlen(passwd) + 1;
-// 	const char			type[] = "producer";
-// 	const unsigned char	type_len = sizeof(type);
-// 	size_t				len;
-
-// 	if (sizeof(type) > TYPE_MAX ||
-// 		user_len + passwd_len + sizeof(int) * 2 > SEND_MAX)
-// 		return (0);
-// 	memcpy(buffer, (void *)(int *)&type_len, sizeof(type_len));
-// 	len = sizeof(type_len);
-// 	memcpy(buffer + len, (void *)type, type_len);
-// 	len += type_len;
-// 	memcpy(buffer + len, (void *)&user_len, sizeof(user_len));
-// 	len += sizeof(user_len);
-// 	memcpy(buffer + len, (void *)user, user_len);
-// 	len += user_len;
-// 	memcpy(buffer + len, (void *)&passwd_len, sizeof(passwd_len));
-// 	len += sizeof(passwd_len);
-// 	memcpy(buffer + len, (void *)passwd, passwd_len);
-// 	len += passwd_len;
-// 	return (send(producer.socket, buffer, len, 0));
-// }
-
-t_producer          start_producer(const char *addr, int port)
+ssize_t				produce(int sock, const void *rawbytes, unsigned int bytes)
 {
-   t_producer       producer;
+	size_t			len;
 
-   producer.socket = new_socket();
-   producer.address = config_socket(addr, port);
-   if (connect(producer.socket, (struct sockaddr*)&producer.address,
-   										sizeof(producer.address)) != 0)
-   {
-      perror("Connect ");
-      exit(errno);
-   }
-   return (producer);
+	if (sizeof(bytes) + bytes > SEND_MAX)
+		return (0);
+	memcpy(buffer, (void *)&bytes, sizeof(bytes));
+	len = sizeof(bytes);
+	memcpy(buffer + len, (void *)rawbytes, bytes);
+	len += bytes;
+	return (send(sock, buffer, len, 0));
 }
 
-void              stop_producer(t_producer producer)
+t_producer			start_producer(const char *addr, int port)
 {
-   delete_socket(producer.socket);
+	t_producer		producer;
+
+	producer.socket = new_socket();
+	producer.address = config_socket(addr, port);
+	if (connect(producer.socket, (struct sockaddr*)&producer.address,
+										sizeof(producer.address)) != 0)
+	{
+		perror("Connect ");
+		exit(errno);
+	}
+	return (producer);
+}
+
+void				stop_producer(t_producer producer)
+{
+	delete_socket(producer.socket);
+}
+
+int             	next_producer(const t_server_producer *producers)
+{
+    unsigned int           i;
+
+    i = 0;
+    while (i < MAX_PRODUCERS)
+    {
+        //if position is empty
+        if (producers[i].socket == 0)
+            return (i);
+        ++i;
+    }
+    return (-1);
 }

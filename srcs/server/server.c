@@ -3,6 +3,7 @@
 #include <macros.h>
 #include <stdio.h>
 #include <errno.h>
+#include <string.h>
 
 static void         config_server(t_server *server, int port)
 {
@@ -39,14 +40,17 @@ static void         config_master(t_server *server)
     }
 }
 
-t_server	       start_server(int port)
+t_server	       *start_server(int port)
 {
-	t_server       server;
+	t_server       *server;
 
-    config_server(&server, port);
+    if (!(server = (t_server *)malloc(sizeof(t_server))))
+        return (NULL);
+    bzero(server, sizeof(*server));
+    config_server(server, port);
     //set master socket to allow multiple connections , this is just a good habit, it will work without this
-    config_master(&server);
+    config_master(server);
     if (VERBOSE)
-    	printf("Server started on port %d\n", port);
+    	printf("Server started on port %d (Memory used: %u bytes)\n", port, sizeof(t_server));
 	return (server);
 }

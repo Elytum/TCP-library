@@ -1,6 +1,9 @@
-Exception: STATUS_ACCESS_VIOLATION at eip=00401C81
-eax=000201D0 ebx=00000000 ecx=00403A00 edx=00000001 esi=00403A00 edi=00000000
-ebp=00000001 esp=0028CAA0 program=C:\Users\a.chazal\Desktop\TCP-library2\server\server.exe, pid 5584, thread main
+Exception: STATUS_ACCESS_VIOLATION at eip=00000000
+eax=00000003 ebx=00000000 ecx=6119FDA0 edx=00000000 esi=00000000 edi=00000000
+ebp=0028CC78 esp=0028ABF0 program=C:\Users\a.chazal\Desktop\TCP-library2\server\server.exe, pid 1164, thread main
 cs=0023 ds=002B es=002B fs=0053 gs=002B ss=002B
 Stack trace:
 Frame     Function  Args
+0028CC78  00000000 (00000001, 0028CC9C, 80010100, 610083CF)
+0028CD28  6100842E (00000000, 0028CD84, 61007530, 00000000)
+End of stack trace

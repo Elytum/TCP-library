@@ -6,42 +6,10 @@
 #include <unistd.h>
 #include <string.h>
 
-static unsigned int               sub_sockets_add_child(int *sockets, struct _types_fd_set *readfds, int max_sd, size_t max)
-{
-    unsigned int         i;
-    int                  sd;
-
-    i = 0;
-    while (i < max) 
-    {
-        //socket descriptor
-        sd = sockets[i];
-        //if valid socket descriptor then add to read list
-        if (sd > 0)
-            FD_SET(sd, readfds);
-        //highest file descriptor number, need it for the select function
-        if (sd > max_sd)
-            max_sd = sd;
-        ++i;
-    }
-    return (max_sd);
-}
-
-static int			      sockets_add_child(t_server server, struct _types_fd_set *readfds)
-{
-	int		      max_sd;
-
-    max_sd = server.master_socket;
-    max_sd = sub_sockets_add_child(server.pending_sockets, readfds, max_sd, MAX_PENDINGS);
-    max_sd = sub_sockets_add_child(server.producer_sockets, readfds, max_sd, MAX_PRODUCERS);
-    max_sd = sub_sockets_add_child(server.consumer_sockets, readfds, max_sd, MAX_CONSUMERS);
-    return (max_sd);
-}
-
 void			 incoming_connection(t_server *server, fd_set *readfds, int *addrlen)
 {
 	int			 new_socket;
-	const char	 message[] = "You're connected\n";
+	// const char	 message[] = "You're connected\n";
 
 	if (FD_ISSET(server->master_socket, readfds)) 
     {
@@ -54,8 +22,8 @@ void			 incoming_connection(t_server *server, fd_set *readfds, int *addrlen)
         if (VERBOSE)
         	printf("New connection , socket fd is %d , ip is : %s , port : %d \n" , new_socket , inet_ntoa(server->address.sin_addr) , ntohs(server->address.sin_port));
         //send new connection greeting message
-        if (send(new_socket, message, sizeof(message) - 1, 0) != (ssize_t)strlen(message))
-            perror("send");
+        // if (send(new_socket, message, sizeof(message) - 1, 0) != (ssize_t)strlen(message))
+        //     perror("send");
         //add new socket to array of sockets
         sockets_add(server->pending_sockets, new_socket, MAX_PENDINGS);
     }
@@ -90,26 +58,41 @@ void             update_producers(t_server *server, fd_set *readfds)
     i = 0;
     while (i < MAX_PRODUCERS) 
     {
-        sd = server->producer_sockets[i];
+        sd = server->producers[i].socket;
 
         if (FD_ISSET(sd , readfds)) 
         {
-            //Launch authentication test
-            if (receive_order(server->producer_sockets[i]) == -1)
+            //Launch reception
+            if (receive_production(server, sd) == -1)
             {
                 //somebody tried to authenticate himself but failed
+                printf("Producer \"%s\" disconnected\n", server->producers[i].name);
                 close(sd);
-                server->producer_sockets[i] = 0;
+                server->producers[i].socket = 0;
             }
         }
         ++i;
     }
 }
 
-void			 socket_event(t_server *server, fd_set *readfds)
+void             update_consumers(t_server *server, fd_set *readfds)
 {
-    update_pendings(server, readfds);
-    update_producers(server, readfds);
+    unsigned int     i;
+    int     sd;
+
+    i = 0;
+    while (i < MAX_CONSUMERS) 
+    {
+        sd = server->consumers[i].socket;
+
+        if (FD_ISSET(sd, readfds)) 
+        {
+            printf("Consumer \"%s\" disconnected\n", server->consumers[i].name);
+            close(sd);
+            server->consumers[i].socket = 0;
+        }
+        ++i;
+    }
 }
 
 void		      loop_server(t_server server)
@@ -132,6 +115,8 @@ void		      loop_server(t_server server)
         //If something happened on the master socket , then its an incoming connection
         incoming_connection(&server, &readfds, &addrlen);
         //else its some IO operation on some other socket :)
-        socket_event(&server, &readfds);
+        update_producers(&server, &readfds);
+        update_consumers(&server, &readfds);
+        update_pendings(&server, &readfds);
     }
 }

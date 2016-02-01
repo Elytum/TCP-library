@@ -41,14 +41,3 @@ struct sockaddr_in	config_socket(const char *addr, int port)
 		config.sin_addr.s_addr = INADDR_ANY;
 	return (config);
 }
-
-// void	    		closing_signal(int id)
-// {
-//     printf("Stopped by signal: %i\n", id);
-//     exit(0);
-// }
-
-// void				setup_signals(void)
-// {
-// 	signal(SIGTERM, &closing_signal);
-// }

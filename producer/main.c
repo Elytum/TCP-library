@@ -9,14 +9,14 @@
 
 void		send_hello(t_producer *producer)
 {
-	char	input[] = "Arthur\n";
+	char	input[] = "Hello";
 
 	if (!producer->socket)
 	{
 		if (DEBUG)
 			printf("Couldn't \"send_hello\", socket is closed\n");
 	}
-	else if (produce_request(producer->socket, "Detected", 8, input, strlen(input) + 1) == -1)
+	else if (produce(producer->socket, input, strlen(input) + 1) == -1)
 		producer->socket = 0;
 	else
 		sleep(1);
@@ -27,13 +27,9 @@ int			main(void)
 	t_producer	producer;
 
 	producer = start_producer(IP, PORT);
-	login(producer.socket, PRODUCER, "Arthur", "Chazal");
+	login_producer(producer.socket, "Arthur", "Chazal", "Detected");
 	while (producer.socket)
-	{
-		printf("Loop\n");
 		send_hello(&producer);
-		printf("Loop end\n");
-	}
 	printf("Not connected to server anymore\n");
 	stop_producer(producer);
 	return (0);

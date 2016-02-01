@@ -16,14 +16,15 @@ CC		=	gcc
 NAME	=	producer
 MYPATH	=	$(HOME)
 #--------------Sources----------------------#
-FILES	=	producer.c			\
-			common.c			\
+FILES	=	common.c			\
 			exchanges.c			\
 			requests/request.c	\
 			requests/requests.c	\
 			producer/producer.c	\
 			login.c				\
-			sockets/sockets.c
+			sockets/sockets.c	\
+			sockets/add_child.c	\
+			consumer/consumer.c
 
 INC		=	-I ../includes -I ../htable -I ../srcs/requests
 CCFLAGS	=	-Wall -Wextra -g -O3

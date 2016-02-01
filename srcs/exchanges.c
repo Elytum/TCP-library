@@ -1,3 +1,4 @@
+#include <socketlib.h>
 #include <sys/socket.h>
 #include <unistd.h>
 #include <config.h>
@@ -28,25 +29,6 @@ void			send_back_message(int sock, char *str, size_t len)
 	send(sock, str, len, 0);
 }
 
-size_t			recv_data(int sock, void *buffer, size_t size, unsigned char tries)
-{
-    ssize_t  i;
-    ssize_t  ret;
-
-    i = 0;
-    while (tries && size)
-    {
-        if (!(ret = recv(sock, buffer + i, size, 0)))
-        {
-        	usleep(1000);
-            --tries;
-        }
-        size -= ret;
-        i += ret;
-    }
-    return (i);
-}
-
 int					empty_recv(int sock)
 {
 	char			buffer[1024];
@@ -56,36 +38,93 @@ int					empty_recv(int sock)
 	return (0);
 }
 
-int					receive_order(int sock)
+int					interested_consumer(t_server_consumer *consumers, const char *type, const char *producer)
 {
-	unsigned char	type_size;
-	unsigned int	size;
-	char			type[TYPE_MAX];
-	char			message[SEND_MAX];
+	unsigned int    id;
 
-	if (recv_data(sock , &type_size, sizeof(type_size), 1) != sizeof(type_size))
-		return (-1);
-	if (type_size)
+    id = 0;
+    while (id < MAX_CONSUMERS)
+    {
+    	if (!consumers[id].socket)
+    	{
+    		++id;
+    		continue ;
+    	}
+    	if (!strcmp(producer, consumers[id].producer) &&
+        	!strcmp(type, consumers[id].product))
+	        return (id);
+        ++id;
+    }
+    return (id);
+}
+
+void				distribute_production(t_server_consumer *consumers, const char *producer, const char *type, const char *data, int size)
+{
+    unsigned int    id;
+    char			buffer[100];
+    int				len;
+
+    if ((id = interested_consumer(consumers, type, producer)) == MAX_CONSUMERS)
+    	return ;
+    memcpy(buffer, &size, sizeof(size));
+    memcpy(buffer + sizeof(size), data, size);
+    len = sizeof(size) + size;
+    while (id < MAX_CONSUMERS)
+    {
+    	if (!consumers[id].socket)
+    	{
+    		++id;
+    		continue ;
+    	}
+    	 if (!strcmp(producer, consumers[id].producer) &&
+        	!strcmp(type, consumers[id].product))
+        {
+        	if (send(consumers[id].socket, buffer, len, 0) == -1)
+        		consumers[id].socket = 0;
+        }
+        ++id;
+    }
+}
+
+void				handle_production(t_server *server, int producer, const char *data, int size)
+{
+	const char		*type = server->producers[producer].product;
+
+	if (!strcmp(type, "Detected"))
+		distribute_production(server->consumers, server->producers[producer].name, "say", data, size);
+	else
+		printf("Unknown production %s\n", type); // UNSAFE BEHAVIOR
+	(void)server;
+}
+
+int					find_producer(t_server *server, int sock)
+{
+	unsigned int	id;
+
+	id = 0;
+	while (id < MAX_PRODUCERS)
 	{
-		if (type_size >= sizeof(type) || recv_data(sock , type, type_size, 10) != type_size)
-			return (empty_recv(sock));
+		if (sock == server->producers[id].socket)
+			return (id);
+		++id;
 	}
-	if (recv_data(sock , &size, sizeof(size), 10) != sizeof(size))
-		return (empty_recv(sock));
+	return (-1);
+}
+
+int					receive_production(t_server *server, int sock)
+{
+	int				size;
+	char			data[SEND_MAX];
+	int				producer = find_producer(server, sock);
+
+	if (producer == -1 || recv(sock , &size, sizeof(size), 0) != sizeof(size))
+		return (-1);
 	if (size)
 	{
-		if (size >= sizeof(message) || recv_data(sock , message, size, 10) != size)
+		if (size >= (int)sizeof(data) || recv(sock , data, size, 0) != size)
 			return (empty_recv(sock));
 	}
-	type[type_size] = '\0';
-	if (!strcmp(type, "print"))
-		printf("print: Typesize: %i [%s], size: %i [%s]\n", type_size, type, size, message);
-	else if (!strcmp(type, "Detected"))
-		printf("Hello %s\n", message);
-	else if (!strcmp(type, "print tab"))
-		printf("print tab: {%i %i}\n", ((int *)message)[0], ((int *)message)[1]);
-	else
-		printf("Unknown order %s\n", type);
+	handle_production(server, producer, data, size);
 	return (1);
 }
 
